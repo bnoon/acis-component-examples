@@ -8,6 +8,8 @@ This builds on several javascript tools
 * The project layout and gulp usage from a vue.js example on [github](https://github.com/vuejs/vue-component-example)
 * [Gulp](http://gulpjs.com/) as a build tool
 
+A working example [here](http://bnoon.github.io/acis-component-examples/)
+
 ## Usage
 
 First, get and install a recent version of [node](http://nodejs.org/).  I have been using both 0.10.26 and 0.11.12.
