@@ -1,0 +1,15 @@
+<div v-show="ready">
+  <div><span class="stnname">{{results.meta.name}}, {{results.meta.state}}</span></div>
+  <table>
+    <thead>
+      <tr>
+        <th v-repeat="columns" v-on="click:sortBy(key)">{{$value}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-repeat="results.data">
+        <td v-repeat="$value">{{$value}}</td>
+      </tr>
+    </tbody>
+  </table>
+<div>

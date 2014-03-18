@@ -1,0 +1,23 @@
+.box.tbl {
+    font-family: "Adobe Garamond Pro", Georgia, serif;
+    font-style: normal;
+    font-size: 1.2em;
+}
+
+.tbl table {
+    width: 100%;
+    border: 2px solid steelblue;
+    border-radius: 3px;
+    background-color: #fff;
+}
+.tbl th {
+    background-color: steelblue;
+    color: #fff;
+    cursor: pointer;
+}
+.tbl td {
+    background-color: #f3f3f3;
+}
+.tbl th, td {
+    padding: 3px 7px;
+}

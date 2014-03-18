@@ -1,0 +1,23 @@
+body {
+    text-align: center;
+    width: 800px;
+    margin: 0 auto;
+    font-size: font-size;
+}
+
+.params {
+    display: inline-block;
+    vertical-align: top;
+    text-align: left;
+    width: 200px;
+    height: 100px;
+    margin: 20px;
+    border: 1px solid #000;
+}
+
+.box {
+    display: inline-block;
+    vertical-align: top;
+    width: 500px;
+    margin: 20px;
+}

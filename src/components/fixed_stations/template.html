@@ -1,0 +1,9 @@
+<div>
+  <label for=stnid>Station Id:</label>
+  <select id=stnid v-model="stn">
+    <option style="display:none" value="" selected disabled>stn_id</option>
+    <option v-repeat="stns">{{$value}}</option>
+  </select>
+  <br>
+  <button v-on="click: update" disabled="{{!params}}">Run</button>
+</div>

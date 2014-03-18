@@ -1,0 +1,25 @@
+{
+  "name": "basic-acis-component",
+  "main": "src/main.js",
+  "scripts": [
+    "src/main.js"
+  ],
+  "styles": [
+    "src/styles/main.css"
+  ],
+  "paths": [
+    "components",
+    "src/components"
+  ],
+  "local": [
+    "fixed_stations",
+    "table_output"
+  ],
+  "dependencies": {
+    "visionmedia/superagent": "*",
+    "yyx990803/vue": "0.10.0-rc",
+    "component/clone": "*",
+    "segmentio/extend": "*"
+  },
+  "remotes": []
+}

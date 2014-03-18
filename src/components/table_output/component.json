@@ -1,0 +1,6 @@
+{
+    "name": "table_output",
+    "scripts": ["index.js"],
+    "styles": ["style.css"],
+    "templates": ["template.html"]
+}
