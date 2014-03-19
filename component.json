@@ -17,7 +17,7 @@
   ],
   "dependencies": {
     "visionmedia/superagent": "*",
-    "yyx990803/vue": "0.10.0-rc",
+    "yyx990803/vue": "*",
     "component/clone": "*",
     "segmentio/extend": "*"
   },
