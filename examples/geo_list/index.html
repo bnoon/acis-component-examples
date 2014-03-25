@@ -34,21 +34,19 @@
         },
         
         ready: function () {
-          geoSelector.$on('clear', this.clear)
           geoSelector.$on('params', this.stnload)
         },
         
         methods: {
-          clear: function () {
-            this.stns = []
-          },
-          
           stnload: function (query) {
-            var self=this,
-                params = {
+            var params = {
                     "meta":["name","state","sids","uid","ll","valid_daterange"],
                     "elems":"maxt,mint,pcpn"
                     }
+            if (!query) {
+              stnLister.stns = []
+              return
+            }
             params[query.gtype] = query.gid
             request
               .post('http://data.rcc-acis.org/StnMeta', params)

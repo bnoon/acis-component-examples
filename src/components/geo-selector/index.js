@@ -18,7 +18,7 @@ module.exports = {
     ready: function () {
       this.$watch('gtype', function(x) {
         this.gid = ''
-        this.$emit('clear')
+        this.$emit('params')
         this.geoload()
       });
       this.$watch('gid', function() {
