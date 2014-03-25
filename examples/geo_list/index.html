@@ -53,6 +53,7 @@
         ready: function () {
           this.$watch('gtype', function(x) {
             this.gid = ''
+            stnLister.clear()
             this.geoload()
           });
           this.$watch('gid', function() {
