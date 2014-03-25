@@ -18,7 +18,7 @@
     </select>
     <select v-model="gid">
       <option style="display:none" value="" selected disabled>Select a region</option>
-      <option v-repeat="gid: gids" value="{{gid.id}}">{{gid.name}}</option>
+      <option v-repeat="gid: gids | orderBy 'id'" value="{{gid.id}}">{{gid.name}}</option>
     </select>
   </script>
 
