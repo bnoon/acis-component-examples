@@ -4,7 +4,7 @@ var gulp      = require('gulp'),
 gulp.task('default', function () {
     gulp.src('component.json')
         .pipe(component({
-            standalone: true
+            standalone: false
         }))
         .pipe(gulp.dest('build'))
 })

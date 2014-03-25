@@ -1,9 +1,5 @@
 {
   "name": "basic-acis-component",
-  "main": "src/main.js",
-  "scripts": [
-    "src/main.js"
-  ],
   "styles": [
     "src/styles/main.css"
   ],
