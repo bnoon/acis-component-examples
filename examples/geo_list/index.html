@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>ACIS examples</title>
+    <meta charset="utf-8">
+</head>
+<body>
+  <div id="geo-selector"></div>
+  <div id="query-results"></div>
+  
+  <script src="../../build/build.js"></script>
+
+  <script type="text/x-template" id="geo-template">
+    <label>Region Type:</label>
+    <select v-model="gtype">
+      <option style="display:none" value="" selected disabled>Select a region type</option>
+      <option v-repeat="geo: gtypes" value="{{geo.param}}">{{geo.name}}</option>
+    </select>
+    <select v-model="gid">
+      <option style="display:none" value="" selected disabled>Select a region</option>
+      <option v-repeat="gid: gids" value="{{gid.id}}">{{gid.name}}</option>
+    </select>
+  </script>
+
+  <script type="text/javascript">
+    var request = require('superagent'),
+        Vue = require('vue');
+
+    var geoSelector = new Vue({
+        el: '#geo-selector',
+        template: "#geo-template",
+
+        data: {
+          state: 'NY',
+          gtypes: [
+            {name: "County", param: "county"},
+            {name: "River Basin", param: "basin"},
+            {name: "Climate Division", param: "climdiv"}
+          ],
+          gtype: '',
+          gids: [],
+          gid: ''
+        },
+
+        ready: function () {
+          this.$watch('gtype', function(x) {
+            this.gid = ''
+            this.geoload()
+          });
+        },
+
+        methods: {
+          geoload: function () {
+            var self=this, params = {state: this.state, meta: ['name','id']}
+            request
+              .post('http://data.rcc-acis.org/General/'+this.gtype, params)
+              .end(function(res){
+                if (res.status == 200) {
+                  if (res.body.error === undefined) self.gids = res.body.meta
+                  else console.log('invalid request %s', res.body.error)
+                } else {
+                  console.log('failed reqest %s',res.status)
+                }
+              })
+          }
+        }
+    });
+
+  </script>
+</body>
+</html>
