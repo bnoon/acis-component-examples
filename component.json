@@ -9,7 +9,8 @@
   ],
   "local": [
     "fixed_stations",
-    "table_output"
+    "table_output",
+    "geo-selector"
   ],
   "dependencies": {
     "visionmedia/superagent": "*",

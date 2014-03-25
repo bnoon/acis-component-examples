@@ -10,18 +10,6 @@
   
   <script src="../../build/build.js"></script>
 
-  <script type="text/x-template" id="geo-template">
-    <label>Region Type:</label>
-    <select v-model="gtype">
-      <option style="display:none" value="" selected disabled>Select a region type</option>
-      <option v-repeat="geo: gtypes" value="{{geo.param}}">{{geo.name}}</option>
-    </select>
-    <select v-model="gid">
-      <option style="display:none" value="" selected disabled>Select a region</option>
-      <option v-repeat="gid: gids | orderBy 'id'" value="{{gid.id}}">{{gid.name}}</option>
-    </select>
-  </script>
-
   <script type="text/x-template" id="station-template">
     <div class="results">
       <div v-repeat="stn: stns | orderBy 'name'">
@@ -32,51 +20,10 @@
 
   <script type="text/javascript">
     var request = require('superagent'),
+        extend = require('extend'),
         Vue = require('vue');
 
-    var geoSelector = new Vue({
-        el: '#geo-selector',
-        template: "#geo-template",
-
-        data: {
-          state: 'NY',
-          gtypes: [
-            {name: "County", param: "county"},
-            {name: "River Basin", param: "basin"},
-            {name: "Climate Division", param: "climdiv"}
-          ],
-          gtype: '',
-          gids: [],
-          gid: ''
-        },
-
-        ready: function () {
-          this.$watch('gtype', function(x) {
-            this.gid = ''
-            stnLister.clear()
-            this.geoload()
-          });
-          this.$watch('gid', function() {
-            if (this.gid) stnLister.stnload({gtype:this.gtype,gid:this.gid});
-          });
-        },
-
-        methods: {
-          geoload: function () {
-            var self=this, params = {state: this.state, meta: ['name','id']}
-            request
-              .post('http://data.rcc-acis.org/General/'+this.gtype, params)
-              .end(function(res){
-                if (res.status == 200) {
-                  if (res.body.error === undefined) self.gids = res.body.meta
-                  else console.log('invalid request %s', res.body.error)
-                } else {
-                  console.log('failed reqest %s',res.status)
-                }
-              })
-          }
-        }
-    });
+    var geoSelector = new Vue(extend({el: '#geo-selector'}, require('geo-selector')));
 
     var stnLister = new Vue({
         el: '#query-results',
@@ -85,7 +32,12 @@
         data: {
           stns: []
         },
-
+        
+        ready: function () {
+          geoSelector.$on('clear', this.clear)
+          geoSelector.$on('params', this.stnload)
+        },
+        
         methods: {
           clear: function () {
             this.stns = []
@@ -102,7 +54,7 @@
               .post('http://data.rcc-acis.org/StnMeta', params)
               .end(function(res){
                 if (res.status == 200) {
-                  if (res.body.error === undefined) self.stns = res.body.meta
+                  if (res.body.error === undefined) stnLister.stns = res.body.meta
                   else console.log('invalid request %s', res.body.error)
                 } else {
                   console.log('failed reqest %s',res.status)

@@ -1,0 +1,8 @@
+{
+    "name": "geo-selector",
+    "scripts": ["index.js"],
+    "templates": ["template.html"],
+    "dependencies": {
+        "visionmedia/superagent": "*"
+    }
+}

@@ -1,0 +1,9 @@
+<label>Region Type:</label>
+<select v-model="gtype">
+  <option style="display:none" value="" selected disabled>Select a region type</option>
+  <option v-repeat="geo: gtypes" value="{{geo.param}}">{{geo.name}}</option>
+</select>
+<select v-model="gid">
+  <option style="display:none" value="" selected disabled>Select a region</option>
+  <option v-repeat="gid: gids | orderBy 'id'" value="{{gid.id}}">{{gid.name}}</option>
+</select>
