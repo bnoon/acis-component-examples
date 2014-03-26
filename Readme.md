@@ -33,7 +33,12 @@ $ npm install && component install
 $ gulp
 ```
 
-Open `index.html` to see the result.
+Open one of the examples:
+
+* `examples/fixed_stn_table/index.html`
+* `examples/geo_list/index.html`
+
+to see the result.
 
 ### Development
 
