@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>ACIS examples</title>
+    <meta charset="utf-8">
+    <style>
+ 
+    body {
+      font: 14px sans-serif;
+    }
+ 
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+ 
+    .line {
+      fill: none;
+      stroke: steelblue;
+      stroke-width: 1.5px;
+    }
+ 
+    </style>
+</head>
+<body>
+  <div id="geo-selector"></div>
+  <div id="query-results"></div>
+  
+  <script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
+  <script src="../../build/build.js"></script>
+
+  <script type="text/x-template" id="station-template">
+    <div class="results">
+      <div v-repeat="stn: stns | orderBy 'name'" v-on="click: showPrcp = !showPrcp">
+        {{stn.name}}
+        <div v-if="showPrcp" v-with="stn" v-component="prcp-plot"></div>
+      </div>
+    </div>
+  </script>
+
+  <script type="text/javascript">
+    var request = require('superagent'),
+        extend = require('extend'),
+        Vue = require('vue');
+
+    Vue.component('prcp-plot',{
+        template: "<div></div>",
+
+        ready: function () {
+          var self=this,
+              params = {
+                "sdate":"20121001","edate":"20130930",
+                "elems":[{"name":"pcpn","interval":"dly","duration":"std","season_start":"10-01","reduce":"sum"}]
+              }
+          params['uid'] = this.uid
+          request
+            .post('http://data.rcc-acis.org/StnData', params)
+            .end(function(res){
+              if (res.status == 200) {
+                if (res.body.error === undefined) self.build_plot(res.body.data)
+                else console.log('invalid request %s', res.body.error)
+              } else {
+                console.log('failed reqest %s',res.status)
+              }
+            })
+        },
+        
+        methods: {
+          build_plot: function (data) {
+            var margin = {top: 20, right: 20, bottom: 30, left: 50},
+                width = 600 - margin.left - margin.right,
+                height = 300 - margin.top - margin.bottom;
+ 
+            var parseDate = d3.time.format("%Y-%m-%d").parse;
+ 
+            var x = d3.time.scale()
+                .range([0, width]);
+ 
+            var y = d3.scale.linear()
+                .range([height, 0]);
+ 
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .ticks(6)
+                .orient("bottom");
+ 
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left");
+ 
+            var line = d3.svg.line()
+                .x(function(d) { return x(d[0]); })
+                .y(function(d) { return y(d[1]); });
+ 
+            var svg = d3.select(this.$el).append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            data.forEach(function(d) {
+              d[0] = parseDate(d[0]);
+              d[1] = +d[1];
+            });
+ 
+            x.domain(d3.extent(data, function(d) { return d[0]; }));
+            y.domain(d3.extent(data, function(d) { return d[1]; }));
+ 
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+ 
+            svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+              .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Precipitation (inch)");
+ 
+            svg.append("path")
+                .datum(data.filter(function (d) { 
+                  return d[1] == d[1];
+                }))
+                .attr("class", "line")
+                .attr("d", line);
+
+          }
+        }
+    });
+
+    var geoSelector = new Vue(extend({el: '#geo-selector'}, require('geo-selector')));
+    
+    Vue.component({
+      template: "<div></div>",
+      
+    })
+
+    var stnLister = new Vue({
+        el: '#query-results',
+        template: "#station-template",
+
+        data: {
+          stns: []
+        },
+        
+        ready: function () {
+          geoSelector.$on('params', this.stnload)
+        },
+        
+        methods: {
+          stnload: function (query) {
+            var params = {
+                    "meta":["name","state","sids","uid","ll","valid_daterange"],
+                    "elems":"maxt,mint,pcpn"
+                    }
+            if (!query) {
+              stnLister.stns = []
+              return
+            }
+            params[query.gtype] = query.gid
+            request
+              .post('http://data.rcc-acis.org/StnMeta', params)
+              .end(function(res){
+                if (res.status == 200) {
+                  if (res.body.error === undefined) stnLister.stns = res.body.meta
+                  else console.log('invalid request %s', res.body.error)
+                } else {
+                  console.log('failed reqest %s',res.status)
+                }
+              })
+          },
+          
+          getData: function (e) {
+            var self = this;
+          }
+        }
+    });
+
+
+  </script>
+</body>
+</html>
