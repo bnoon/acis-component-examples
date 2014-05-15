@@ -1,0 +1,4 @@
+{"state":"ny","grid":21,"sdate":"1895","edate":"2012",
+ "elems":[
+  {"name":"yly_maxt","area_reduce":"state_mean"},
+  {"name":"yly_maxt","area_reduce":"county_mean"}]}

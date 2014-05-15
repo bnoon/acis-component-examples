@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>ACIS Leaflet examples</title>
+    <meta charset="utf-8">
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+	  <link rel="stylesheet" href="../../vendor/leaflet.css" />
+    <style>
+ 
+    body {
+      font: 14px sans-serif;
+      padding: 20px;
+    }
+    
+    .area-btn,
+    .prod-btn {
+      margin: 2px 4px;
+    }
+    .area-btn.selected,
+    .prod-btn.selected {
+      margin: 2px 4px;
+      color: black;
+    }
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+ 
+    .line {
+      fill: none;
+      stroke: black;
+      stroke-opacity: 0.5;
+      stroke-width: 3.5px;
+    }
+
+    .overlay {
+      fill: none;
+      pointer-events: all;
+    }
+
+    </style>
+</head>
+<body>
+  
+  <script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
+  <script src="../../vendor/leaflet.js"></script>
+  <script src="../../build/build.js"></script>
+  <script src="dataplot.js"></script>
+  <script src="map.js"></script>
+
+  <script type="text/x-template" id="results-template">
+    <div class="row">
+      <div class="col-md-8">
+        <div class="row" v-component="prod-list" v-ref="prodList"></div>
+        <hr>
+        <div class="row">
+          <button class="badge badge-primary area-btn"
+            v-class="selected: state.selected"
+            v-on="click: clickState(this,$event)">
+          New York State
+          </button>
+        </div>
+        <div class="row" v-component="area-list" v-ref="areaList" v-with="areas : areas"></div>
+      </div>
+      <div id="mapID" class="col-md-4"
+        style="height: 350px; border: 1px solid #ccc"
+        v-component="ny-map" v-ref="map" v-with="areas: areas">
+      </div>
+    </div>
+    <div class="row" id="results">
+      <div v-repeat="area: selectedareas" v-with="products: products">
+        <div v-repeat="prod: products" v-component="{{prod.comp}}" v-with="area: area"></div>
+      </div>
+    </div>
+  </script>
+
+  <script type="text/x-template" id="prod-list-template">
+    <button class="badge badge-primary prod-btn" 
+      v-class="selected : prod.selected" 
+      v-on="click: click(this,$event)"
+      v-repeat="prod: products">{{prod.short}}</button>
+  </script>
+
+  <script type="text/x-template" id="area-list-template">
+    <button class="badge badge-primary area-btn" 
+      v-class="selected : area.selected" 
+      v-on="click: clickArea(this,$event)"
+      v-repeat="area: areas | orderBy 'name'">{{area.name}}</button>
+  </script>
+
+  <script type="text/javascript">
+    var request = require('superagent'),
+        Vue = require('vue');
+    
+    
+    Vue.component('prod-list',{
+      el: '#prod-list',
+      template: "#prod-list-template",
+  
+      data: {
+        products: {
+          grdAnnMaxT: {
+            title: "Annual Mean Maximum Temperature",
+            short: "Annual Max Temperature",
+            url: "prism_yly_maxt_ny_cnty.json",
+            comp: "temp-plot",
+            ylabel: "Temp. °F",
+            valueFormat: "5.1f"
+          },
+          grdAnnMinT: {
+            title: "Annual Mean Minimum Temperature",
+            short: "Annual Min Temperature",
+            url: "prism_yly_mint_ny_cnty.json",
+            comp: "temp-plot",
+            ylabel: "Temp. °F",
+            valueFormat: "5.1f"
+
+          },
+          grdAnnAvgT: {
+            title: "Annual Mean Average Temperature",
+            short: "Annual Avg Temperature",
+            url: "prism_yly_meant_ny_cnty.json",
+            comp: "temp-plot",
+            ylabel: "Temp. °F",
+            valueFormat: "5.1f"
+
+          },
+          grdAnnPcpn: {
+            title: "Annual Total Precipitation",
+            short: "Annual Precipitation",
+            url: "prism_yly_pcpn_ny_cnty.json",
+            comp: "temp-plot",
+            ylabel: "Prcp. inches",
+            valueFormat: "7.3f"
+          },
+        },
+        selected: []
+      },
+      
+      methods: {
+      
+        click: function (p,e) {
+          p.prod.selected = !p.prod.selected
+          if (p.prod.selected) {
+            if (p.prod.results === undefined) this.load(p.prod)
+            else this.selected.push(p.prod)
+          } else {
+            this.selected.$remove(p.prod)
+          }
+        },
+        
+        load: function (prod) {
+          var vm = this
+          request
+            .get(prod.url)
+            .accept("json")
+            .end(function (err,res) {
+              var rd = res.body.data, od = {NY:[]},  vX=-Infinity, vN=Infinity
+              for (id in rd[0][2]) { if (id.slice(0,2) == '36') od[id] = [] }
+              rd.forEach( function (v) {
+                var val, yr = v[0]
+                od['NY'].push([yr,v[1]['NY']])
+                for (id in v[2]) {
+                  if (id.slice(0,2) == '36') {
+                    val = v[2][id]
+                    vX = vX > val ? vX : val
+                    vN = vN < val ? vN : val
+                    od[id].push([yr,val])
+                  }
+                }
+              })
+              prod.results = od
+              prod.range = [vN,vX]
+              if (prod.selected) vm.selected.push(prod)
+            })
+        }
+        
+      }
+    })
+  
+    Vue.component('area-list',{
+      el: '#area-list',
+      template: "#area-list-template",
+      parent: app,
+  
+      data: {
+        areas: []
+      },
+      
+      methods: {
+        clickArea: function (a,e) {
+          if (!e.shiftKey) {
+            this.areas.forEach( function (v) {
+              if (v!=a.area) v.selected = false
+            })
+          }
+          a.area.selected = !a.area.selected
+        }
+      }
+    })
+  
+    var app = new Vue({
+      el: "body",
+      template: "#results-template",
+      replace: true,
+
+      data: {
+        gtype: "county",
+        areas: [],
+        state: {
+          name: "New York State",
+          gid: "NY"
+        }
+      },
+      
+      components: {
+        "temp-plot": Vue.component('data-plot')
+      },
+      
+      computed: {
+        selectedareas: function () {
+          return (this.state.selected ? [this.state] : []).concat(
+            this.areas.filter(function (v) { return v.selected }))
+        },
+        products: function () {
+          return this.$.prodList.selected
+        }
+      },
+      
+      ready: function () {
+        this.$on("hoverIndex", function (idx) {
+          this.$broadcast("hoverIndex",idx)
+        })
+        setTimeout(this.load, 50);
+        request
+          .post("http://data.rcc-acis.org/General/county",
+            {meta:["name","id","state","bbox","geojson"],state:"NY"})
+          .end(function(res) {
+            if (res.status == 200) {
+              if (res.body.error === undefined) {
+                var aList = [];
+                res.body.meta.forEach(function (k) {
+                  var feature = {
+                    type:"Feature",
+                    name: k.name,
+                    gid: k.id,
+                    properties:{id:k.id,name:k.name},
+                    geometry:k.geojson
+                  };
+                  aList.push(feature);
+                });
+                app.areas = aList;
+                app.$broadcast("loadAreas",aList);
+              } else console.log('invalid request %s',res.body.error)
+            } else {
+              console.log('failed request %s',res.status)
+            }
+          })
+      },
+      
+      methods: {
+      
+        clickState: function (a,e) {
+          this.state.selected = !this.state.selected
+        }
+
+      }
+    });    
+  
+  </script>
+</body>
+</html>
