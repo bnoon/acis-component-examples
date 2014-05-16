@@ -18,6 +18,14 @@ Vue.component('ny-map',{
           layers[i].setStyle({fillOpacity: 0})
         }
       })
+    },
+
+    updateBounds: function () {
+      var layers = this.county.getLayers(),
+        mapBounds = this.map.getBounds()
+      this.areas.forEach(function (v,i) {
+        v.onMap = mapBounds.intersects(layers[i].getBounds())
+      })
     }
   },
 
@@ -31,6 +39,10 @@ Vue.component('ny-map',{
         attribution: 'Tiles courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">. Map data (c) <a href="http://www.openstreetmap.org/" target="_blank">OpenStreetMap</a> contributors, CC-BY-SA.'
     });
     m.addLayer(mapquestOSM);
+
+    m.on("moveend", function (e) {
+      vm.updateBounds()
+    })
 
     var county = this.county = new L.GeoJSON(null, {
         style: {
