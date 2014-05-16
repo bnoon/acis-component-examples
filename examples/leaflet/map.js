@@ -7,7 +7,6 @@ Vue.component('ny-map',{
       if (this.county.getLayers().length == 0) {
         var layer=this.county
         areas.forEach(function (v) {
-          v.onMap = true;
           layer.addData(v)
         })
       }

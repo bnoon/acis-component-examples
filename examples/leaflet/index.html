@@ -87,7 +87,7 @@
     <button class="badge badge-primary area-btn" 
       v-class="selected : area.selected" 
       v-on="click: clickArea(this,$event)"
-      v-show="area.onMap"
+      v-show="area.selected || area.onMap"
       v-repeat="area: areas | orderBy 'name'">{{area.name}}</button>
   </script>
 
@@ -201,7 +201,7 @@
         }
       }
     })
-  
+
     var app = new Vue({
       el: "body",
       template: "#results-template",
@@ -247,6 +247,8 @@
                     type:"Feature",
                     name: k.name,
                     gid: k.id,
+                    onMap: true,
+                    selected: false,
                     properties:{id:k.id,name:k.name},
                     geometry:k.geojson
                   };
