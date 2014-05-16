@@ -87,6 +87,7 @@
     <button class="badge badge-primary area-btn" 
       v-class="selected : area.selected" 
       v-on="click: clickArea(this,$event)"
+      v-show="area.onMap"
       v-repeat="area: areas | orderBy 'name'">{{area.name}}</button>
   </script>
 
